@@ -150,8 +150,21 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a
     <div id="dups-list"></div>
   </div>
   <div id="tab-missing" style="display:none">
-    <div class="sec-label" id="miss-title">Estampas que faltan</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px">
+      <div class="sec-label" id="miss-title" style="margin:0">Estampas que faltan</div>
+      <button onclick="window._exportMissing()" style="font-size:12px;padding:5px 12px;cursor:pointer;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#555;font-family:inherit">📋 Copiar lista</button>
+    </div>
     <div id="miss-list"></div>
+    <div id="export-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center">
+      <div style="background:#fff;border-radius:16px;padding:1.5rem;max-width:400px;width:90%;max-height:80vh;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b style="font-size:15px">📋 Mis estampas pendientes</b>
+          <button onclick="document.getElementById('export-modal').style.display='none'" style="border:none;background:none;font-size:22px;cursor:pointer;color:#888;line-height:1">×</button>
+        </div>
+        <textarea id="export-text" readonly style="flex:1;min-height:280px;font-size:12px;font-family:monospace;border:0.5px solid #ddd;border-radius:8px;padding:10px;resize:none;color:#333;line-height:1.7"></textarea>
+        <button onclick="window._copyExport()" id="copy-btn" style="padding:10px;font-size:14px;font-weight:600;background:#1a1a1a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit">Copiar al portapapeles</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -419,6 +432,38 @@ function switchTab(tab){
   if(tab==='dups')renderDups();
   if(tab==='missing')renderMiss();
 }
+
+window._exportMissing=function(){
+  const items=[];
+  TEAMS.forEach(team=>{
+    const missing=[];
+    for(let p=1;p<=team.c;p++){
+      const gn=team.s+p-1;
+      if(!(copies[gn]>=1)) missing.push(team.p+p);
+    }
+    if(missing.length) items.push(`${team.n}: ${missing.join(', ')}`);
+  });
+  const total=Object.keys(copies).filter(k=>copies[k]>=1).length;
+  const text=`🏆 Panini FIFA World Cup 2026\nMe faltan ${980-total} estampas:\n\n`+items.join('\n');
+  document.getElementById('export-text').value=text;
+  const modal=document.getElementById('export-modal');
+  modal.style.display='flex';
+  document.getElementById('copy-btn').textContent='Copiar al portapapeles';
+};
+
+window._copyExport=function(){
+  const ta=document.getElementById('export-text');
+  ta.select();
+  ta.setSelectionRange(0,99999);
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    document.getElementById('copy-btn').textContent='✓ ¡Copiado!';
+    setTimeout(()=>{document.getElementById('copy-btn').textContent='Copiar al portapapeles';},2000);
+  }).catch(()=>{
+    document.execCommand('copy');
+    document.getElementById('copy-btn').textContent='✓ ¡Copiado!';
+    setTimeout(()=>{document.getElementById('copy-btn').textContent='Copiar al portapapeles';},2000);
+  });
+};
 
 window.switchTab=switchTab;
 window.setFilter=setFilter;
