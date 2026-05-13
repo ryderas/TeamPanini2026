@@ -10,7 +10,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a
 .container{max-width:780px;margin:0 auto;padding:0 1rem}
 .header{padding:1.25rem 0 .75rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid #e0ddd5;margin-bottom:1rem}
 .title{font-size:20px;font-weight:600;color:#1a1a1a}
-.sync-bar{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 12px;border-radius:8px;background:#fff;border:0.5px solid #ddd;margin-bottom:10px}
+.sync-bar{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 12px;border-radius:8px;background:#fff;border:0.5px solid #ddd;margin-bottom:10px;flex-wrap:wrap}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;transition:background .3s}
 .sync-dot.online{background:#1D9E75}
 .sync-dot.syncing{background:#EF9F27;animation:pulse 1s infinite}
@@ -80,9 +80,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a
 .add-btn:hover{background:#f0f0ec}
 .empty{text-align:center;padding:2.5rem;color:#aaa;font-size:14px}
 .sec-label{font-size:13px;font-weight:600;color:#666;margin:12px 0 8px}
-/* Modal de nombre */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:999}
-.modal{background:#fff;border-radius:16px;padding:2rem;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal{background:#fff;border-radius:16px;padding:2rem;max-width:340px;width:90%;text-align:center}
 .modal h2{font-size:18px;font-weight:600;margin-bottom:.5rem}
 .modal p{font-size:13px;color:#666;margin-bottom:1.25rem}
 .modal input{width:100%;padding:10px 14px;font-size:15px;border:0.5px solid #ccc;border-radius:8px;font-family:inherit;outline:none;margin-bottom:1rem;text-align:center}
@@ -93,80 +92,72 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a
 </head>
 <body>
 
-<!-- Modal nombre de usuario -->
 <div class="modal-bg" id="modal">
   <div class="modal">
-    <div style="font-size:32px;margin-bottom:.75rem">🏆</div>
+    <div style="font-size:36px;margin-bottom:.75rem">🏆</div>
     <h2>Panini FIFA 2026</h2>
-    <p>¿Con qué nombre quieres aparecer? Así la otra persona ve quién hizo cada cambio.</p>
+    <p>¿Con qué nombre quieres aparecer?</p>
     <input type="text" id="username-input" placeholder="Tu nombre..." maxlength="20">
     <button onclick="startApp()">Entrar al álbum</button>
   </div>
 </div>
 
 <div class="container" id="app" style="display:none">
-
-<div class="header">
-  <div class="title">🏆 Panini FIFA World Cup 2026</div>
-  <div class="stats">
-    <div class="stat green">Tenidas: <b id="st-owned">0</b></div>
-    <div class="stat amber">Duplicados: <b id="st-dups">0</b></div>
-    <div class="stat red">Faltan: <b id="st-miss">0</b></div>
-    <div class="stat">Total: <b>980</b></div>
+  <div class="header">
+    <div class="title">🏆 Panini FIFA World Cup 2026</div>
+    <div class="stats">
+      <div class="stat green">Tenidas: <b id="st-owned">0</b></div>
+      <div class="stat amber">Duplicados: <b id="st-dups">0</b></div>
+      <div class="stat red">Faltan: <b id="st-miss">0</b></div>
+      <div class="stat">Total: <b>980</b></div>
+    </div>
+  </div>
+  <div class="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span>Conectado como <span class="sync-user" id="sync-user"></span></span>
+    <span class="sync-status" id="sync-status">— conectando...</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('album')">Álbum</button>
+    <button class="tab" onclick="switchTab('dups')">Mis duplicados</button>
+    <button class="tab" onclick="switchTab('missing')">Me faltan</button>
+  </div>
+  <div id="tab-album">
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="🔍 Buscar equipo o código..." oninput="renderAlbum()">
+      <select id="fsel" onchange="renderAlbum()">
+        <option value="all">Todos los equipos</option>
+        <option value="complete">Completos</option>
+        <option value="incomplete">Incompletos</option>
+      </select>
+    </div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#eaf3de;border:0.5px solid #639922"></div>Tenida</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#faeeda;border:0.5px solid #BA7517"></div>Duplicada</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#fafaf8;border:1.5px solid #EF9F27"></div>Foil ✨</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#fafaf8;border:0.5px solid #ddd"></div>Faltante</div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
+      <button class="filter-btn" onclick="setFilter('owned',this)">Tenidas</button>
+      <button class="filter-btn" onclick="setFilter('doubled',this)">Duplicadas</button>
+      <button class="filter-btn" onclick="setFilter('missing',this)">Faltan</button>
+    </div>
+    <div class="teams-grid" id="teams-grid"></div>
+  </div>
+  <div id="tab-dups" style="display:none">
+    <div class="sec-label" id="dups-title">Estampas duplicadas</div>
+    <div id="dups-list"></div>
+  </div>
+  <div id="tab-missing" style="display:none">
+    <div class="sec-label" id="miss-title">Estampas que faltan</div>
+    <div id="miss-list"></div>
   </div>
 </div>
-
-<div class="sync-bar">
-  <div class="sync-dot" id="sync-dot"></div>
-  <span>Conectado como <span class="sync-user" id="sync-user"></span></span>
-  <span class="sync-status" id="sync-status">— conectando...</span>
-</div>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('album')">Álbum</button>
-  <button class="tab" onclick="switchTab('dups')">Mis duplicados</button>
-  <button class="tab" onclick="switchTab('missing')">Me faltan</button>
-</div>
-
-<div id="tab-album">
-  <div class="toolbar">
-    <input type="text" id="search" placeholder="🔍 Buscar equipo o código..." oninput="renderAlbum()">
-    <select id="fsel" onchange="renderAlbum()">
-      <option value="all">Todos los equipos</option>
-      <option value="complete">Completos</option>
-      <option value="incomplete">Incompletos</option>
-    </select>
-  </div>
-  <div class="legend">
-    <div class="leg-item"><div class="leg-dot" style="background:#eaf3de;border:0.5px solid #639922"></div>Tenida</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#faeeda;border:0.5px solid #BA7517"></div>Duplicada</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#fafaf8;border:1.5px solid #EF9F27"></div>Foil ✨</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#fafaf8;border:0.5px solid #ddd"></div>Faltante</div>
-  </div>
-  <div class="filter-row">
-    <button class="filter-btn active" onclick="setFilter('all',this)">Todos</button>
-    <button class="filter-btn" onclick="setFilter('owned',this)">Tenidas</button>
-    <button class="filter-btn" onclick="setFilter('doubled',this)">Duplicadas</button>
-    <button class="filter-btn" onclick="setFilter('missing',this)">Faltan</button>
-  </div>
-  <div class="teams-grid" id="teams-grid"></div>
-</div>
-
-<div id="tab-dups" style="display:none">
-  <div class="sec-label" id="dups-title">Estampas duplicadas</div>
-  <div id="dups-list"></div>
-</div>
-
-<div id="tab-missing" style="display:none">
-  <div class="sec-label" id="miss-title">Estampas que faltan</div>
-  <div id="miss-list"></div>
-</div>
-
-</div><!-- /container -->
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCA3jO5QdgxRr-SFI-4C7HFso2VeHtE0WY",
@@ -175,15 +166,13 @@ const firebaseConfig = {
   projectId: "panini-2026-cd0b4",
   storageBucket: "panini-2026-cd0b4.firebasestorage.app",
   messagingSenderId: "713042598938",
-  appId: "1:713042598938:web:fef214683ce57530e2c5a3",
-  measurementId: "G-LZW4ZV80XD"
+  appId: "1:713042598938:web:fef214683ce57530e2c5a3"
 };
 
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
-const copiesRef = ref(db, 'album/copies');
-const lastEditRef = ref(db, 'album/lastEdit');
 
+// Orden correcto verificado con la app Panini oficial
 const TEAMS=[
   {p:'FWC',n:'Introducción',s:1,c:9},
   {p:'MEX',n:'México',s:10,c:20},
@@ -216,105 +205,96 @@ const TEAMS=[
   {p:'NZL',n:'Nueva Zelanda',s:550,c:20},
   {p:'ESP',n:'España',s:570,c:20},
   {p:'CPV',n:'Cabo Verde',s:590,c:20},
-  {p:'COL',n:'Colombia',s:610,c:20},
-  {p:'CRO',n:'Croacia',s:630,c:20},
-  {p:'ALG',n:'Argelia',s:650,c:20},
-  {p:'ARG',n:'Argentina',s:670,c:20},
-  {p:'FRA',n:'Francia',s:690,c:20},
-  {p:'GHA',n:'Ghana',s:710,c:20},
-  {p:'KSA',n:'Arabia Saudita',s:730,c:20},
-  {p:'SEN',n:'Senegal',s:750,c:20},
-  {p:'URU',n:'Uruguay',s:770,c:20},
-  {p:'PAN',n:'Panamá',s:790,c:20},
+  {p:'KSA',n:'Arabia Saudita',s:610,c:20},
+  {p:'URU',n:'Uruguay',s:630,c:20},
+  {p:'FRA',n:'Francia',s:650,c:20},
+  {p:'SEN',n:'Senegal',s:670,c:20},
+  {p:'IRQ',n:'Iraq',s:690,c:20},
+  {p:'NOR',n:'Noruega',s:710,c:20},
+  {p:'ARG',n:'Argentina',s:730,c:20},
+  {p:'ALG',n:'Argelia',s:750,c:20},
+  {p:'AUT',n:'Austria',s:770,c:20},
+  {p:'JOR',n:'Jordania',s:790,c:20},
   {p:'POR',n:'Portugal',s:810,c:20},
-  {p:'IRQ',n:'Iraq',s:830,c:20},
+  {p:'COD',n:'R.D. Congo',s:830,c:20},
   {p:'UZB',n:'Uzbekistán',s:850,c:20},
-  {p:'JOR',n:'Jordania',s:870,c:20},
-  {p:'NOR',n:'Noruega',s:890,c:20},
-  {p:'AUT',n:'Austria',s:910,c:20},
-  {p:'COD',n:'R.D. Congo',s:930,c:20},
-  {p:'PO1',n:'Playoff 1',s:950,c:20},
-  {p:'PO2',n:'Playoff 2',s:970,c:11},
+  {p:'COL',n:'Colombia',s:870,c:20},
+  {p:'ENG',n:'Inglaterra',s:890,c:20},
+  {p:'CRO',n:'Croacia',s:910,c:20},
+  {p:'GHA',n:'Ghana',s:930,c:20},
+  {p:'PAN',n:'Panamá',s:950,c:20},
+  {p:'MUS',n:'FIFA Museum',s:970,c:11},
 ];
 
-const ownedList=[1,2,3,4,5,10,11,12,16,19,20,24,26,27,28,29,22,31,32,33,34,35,36,37,39,41,45,48,49,51,52,53,55,56,58,63,65,66,67,69,71,72,73,75,80,83,84,88,89,90,93,94,100,104,105,106,107,108,109,110,111,117,120,131,133,134,136,137,138,141,144,145,148,152,153,155,156,158,164,169,162,170,171,173,175,176,177,179,180,184,185,188,189,190,191,192,193,194,197,198,199,203,206,207,208,209,202,210,211,213,214,217,218,220,221,223,225,228,229,230,231,233,234,235,237,238,239,240,241,243,244,245,246,247,248,249,250,254,265,267,273,274,280,283,285,286,288,290,291,292,293,294,295,299,300,303,304,306,307,308,310,313,316,317,318,319,323,327,322,330,331,332,334,335,337,338,341,343,346,348,349,350,351,352,356,357,358,359,360,361,363,364,365,366,368,370,371,372,373,374,376,377,378,379,380,381,383,384,385,386,382,390,391,393,394,395,397,403,404,407,402,411,415,416,417,419,420,421,423,424,426,427,428,429,430,434,437,439,440,443,444,446,447,448,449,442,459,464,465,470,473,474,475,476,478,479,484,489,490,491,492,493,496,497,498,499,500,503,504,505,506,507,508,512,513,515,516,517,521,523,524,525,526,528,529,531,533,535,538,541,543,545,546,547,549,551,554,555,556,559,561,564,565,568,569,570,571,572,574,575,576,578,579,584,586,587,589,582,590,593,594,595,597,598,600,603,604,605,606,607,608,610,612,613,614,615,616,617,621,623,625,627,628,629,630,631,633,635,637,640,644,646,649,650,651,658,659,661,663,664,665,668,669,670,671,673,674,676,677,678,679,681,683,684,685,686,688,693,694,695,701,704,710,711,712,713,714,715,717,718,719,723,724,729,722,732,733,734,735,737,738,740,741,743,746,748,750,751,754,756,757,758,761,763,765,766,767,768,762,770,772,774,775,776,777,778,780,781,783,784,786,787,790,791,796,797,798,799,800,804,805,806,807,802,810,813,814,815,817,818,819,820,823,827,828,822,831,832,836,841,843,846,847,851,852,854,857,858,861,864,865,869,870,871,872,880,881,883,884,885,888,889,890,891,893,894,897,898,900,901,905,906,907,909,910,913,914,917,918,926,929,930,931,932,933,934,935,937,939,943,947,948,949,950,953,955,957,964,965,973,974,975,977,978];
-const doublesList=[13,14,15,18,21,43,44,50,59,96,125,132,140,151,174,204,205,232,236,266,272,296,301,314,321,412,425,441,469,509,514,527,532,534,536,540,560,580,624,654,675,687,690,736,739,744,745,747,749,753,764,769,785,792,795,809,826,838,855,856,892,895,896,904,923,951,967,971,976];
-
-let copies = {};
-let userName = '';
-let stickerFilter = 'all';
-let collapsed = {};
-let initialized = false;
+const ownedList=[1,2,3,4,5,10,11,12,16,19,20,24,26,27,28,29,22,32,33,34,35,36,37,39,41,45,48,49,51,52,53,55,56,58,63,65,66,67,69,71,72,73,75,80,83,84,88,89,90,93,94,100,104,105,106,107,108,109,110,111,117,120,131,133,134,136,137,138,141,144,145,148,152,153,155,156,158,164,169,162,170,171,173,176,177,179,180,184,185,188,189,190,191,192,193,194,197,198,199,203,206,207,208,209,202,211,213,214,217,218,220,221,223,225,228,229,230,231,233,234,235,237,238,239,240,241,243,244,245,246,247,248,249,250,254,265,267,270,273,274,280,283,285,286,288,290,291,292,293,294,295,299,300,303,304,306,307,308,310,313,316,317,318,319,323,327,322,330,331,332,334,335,337,338,341,343,346,348,349,350,351,352,356,357,358,359,360,361,363,364,365,366,368,370,371,372,373,374,376,377,378,379,380,381,383,384,385,386,382,390,391,393,394,395,397,403,404,407,402,411,415,416,417,419,420,421,423,424,426,427,428,429,430,434,437,439,440,443,444,446,447,448,449,442,459,464,465,470,473,474,475,476,478,479,484,489,490,492,493,494,495,496,497,498,499,500,503,505,506,507,508,512,513,515,516,517,521,523,524,525,526,528,529,531,533,535,538,541,543,545,546,547,549,551,554,555,556,559,561,564,565,568,569,570,571,572,574,575,576,579,584,586,587,589,582,590,593,594,595,597,598,600,603,604,605,606,607,608,610,612,613,614,615,616,617,621,623,625,627,628,629,630,631,633,635,637,640,644,646,649,650,651,658,661,663,664,665,668,669,670,671,673,674,676,677,678,679,681,683,684,685,686,688,693,694,695,701,704,710,711,712,713,714,715,717,718,719,723,724,729,722,732,733,734,735,737,738,740,741,743,746,748,750,751,754,756,757,758,761,763,765,766,767,768,762,770,772,774,775,776,777,778,780,781,783,784,786,787,790,791,796,797,798,799,800,804,805,806,807,802,810,813,814,815,817,818,819,820,823,827,828,822,831,832,836,841,843,846,847,851,852,854,857,858,861,864,865,869,870,871,872,880,881,883,884,885,888,889,890,891,893,894,897,898,900,901,905,906,907,909,913,914,917,918,926,929,930,931,932,933,934,935,937,939,943,947,948,949,950,953,955,957,964,965,973,974,975,977,978];
+const doublesList=[13,14,15,18,21,31,43,44,50,59,96,125,132,140,151,174,175,204,205,210,232,236,266,272,296,301,314,321,412,425,441,469,491,504,509,514,527,532,534,536,540,560,578,580,624,654,659,675,687,690,736,739,744,745,747,749,753,764,769,785,792,795,809,826,838,855,856,892,895,896,904,910,923,951,967,971,976];
 
 function buildInitialCopies(){
-  const c = {};
+  const c={};
   ownedList.forEach(n=>{c[n]=1;});
-  doublesList.forEach(n=>{c[n]=(c[n]||0)+1;});
+  doublesList.forEach(n=>{c[n]=2;});
   return c;
 }
 
-function teamOf(gn){return TEAMS.find(t=>gn>=t.s&&gn<t.s+t.c);}
-function codeOf(gn){const t=teamOf(gn);if(!t)return'#'+gn;return t.p+(gn-t.s+1);}
-function isFoil(t,pos){if(t.p==='FWC')return false;return pos===1||pos===13;}
+const toKey=gn=>'s'+gn;
+const fromKey=k=>parseInt(k.slice(1));
 
-function setSyncStatus(state, msg){
-  const dot = document.getElementById('sync-dot');
-  const status = document.getElementById('sync-status');
-  dot.className = 'sync-dot ' + state;
-  status.textContent = '— ' + msg;
+let copies={},userName='',stickerFilter='all',collapsed={};
+
+const teamOf=gn=>TEAMS.find(t=>gn>=t.s&&gn<t.s+t.c);
+const codeOf=gn=>{const t=teamOf(gn);return t?t.p+(gn-t.s+1):'#'+gn;};
+const isFoil=(t,pos)=>t.p!=='FWC'&&t.p!=='MUS'&&(pos===1||pos===13);
+
+function setSyncStatus(state,msg){
+  const dot=document.getElementById('sync-dot');
+  const st=document.getElementById('sync-status');
+  if(dot)dot.className='sync-dot '+state;
+  if(st)st.textContent='— '+msg;
 }
 
 function updateStats(){
-  const owned = Object.values(copies).filter(v=>v>=1).length;
-  const dups = Object.values(copies).filter(v=>v>1).length;
-  document.getElementById('st-owned').textContent = owned;
-  document.getElementById('st-dups').textContent = dups;
-  document.getElementById('st-miss').textContent = 980 - owned;
+  const owned=Object.values(copies).filter(v=>v>=1).length;
+  const dups=Object.values(copies).filter(v=>v>1).length;
+  document.getElementById('st-owned').textContent=owned;
+  document.getElementById('st-dups').textContent=dups;
+  document.getElementById('st-miss').textContent=980-owned;
 }
 
-async function saveToFirebase(gn, value){
+async function saveOne(gn,value){
   setSyncStatus('syncing','guardando...');
-  try {
-    const updates = {};
-    updates['album/copies/' + gn] = value;
-    updates['album/lastEdit'] = { user: userName, sticker: gn, value, time: Date.now() };
-    await update(ref(db), updates);
+  try{
+    const upd={};
+    upd['album/copies/'+toKey(gn)]=value>0?value:null;
+    upd['album/lastEdit']={user:userName,sticker:gn,value,time:Date.now()};
+    await update(ref(db),upd);
     setSyncStatus('online','sincronizado ✓');
-  } catch(e) {
-    setSyncStatus('offline','error al guardar');
-    console.error(e);
-  }
+  }catch(e){setSyncStatus('offline','error — revisa conexión');}
 }
 
 function toggleSticker(gn){
-  const c = copies[gn]||0;
-  let newVal;
-  if(c===0) newVal=1;
-  else if(c===1) newVal=2;
-  else newVal=null;
-  if(newVal===null) delete copies[gn];
-  else copies[gn]=newVal;
-  updateStats(); renderAlbum(); renderDups(); renderMiss();
-  saveToFirebase(gn, newVal===null ? 0 : newVal);
+  const c=copies[gn]||0;
+  const nv=c===0?1:c===1?2:0;
+  if(nv===0)delete copies[gn];else copies[gn]=nv;
+  updateStats();renderAlbum();renderDups();renderMiss();
+  saveOne(gn,nv);
 }
 
-function adjCopies(gn, d, e){
-  if(e&&e.stopPropagation) e.stopPropagation();
-  const c = copies[gn]||0;
-  if(c===0) return;
-  const nc = Math.max(1, c+d);
-  copies[gn] = nc;
-  updateStats(); renderAlbum(); renderDups();
-  saveToFirebase(gn, nc);
+function adjCopies(gn,d,e){
+  if(e&&e.stopPropagation)e.stopPropagation();
+  const c=copies[gn]||0;
+  if(c===0)return;
+  copies[gn]=Math.max(1,c+d);
+  updateStats();renderAlbum();renderDups();
+  saveOne(gn,copies[gn]);
 }
 
 function markOwned(gn){
-  if(!(copies[gn]>=1)) copies[gn]=1;
-  updateStats(); renderAlbum(); renderMiss();
-  saveToFirebase(gn, 1);
+  copies[gn]=1;
+  updateStats();renderAlbum();renderMiss();
+  saveOne(gn,1);
 }
 
-function setFilter(f, btn){
+function setFilter(f,btn){
   stickerFilter=f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -330,28 +310,28 @@ function renderAlbum(){
   TEAMS.forEach((team,ti)=>{
     const stickers=[];
     for(let p=1;p<=team.c;p++){const gn=team.s+p-1;stickers.push({p,gn,code:team.p+p,foil:isFoil(team,p)});}
-    const ownedCnt=stickers.filter(s=>(copies[s.gn]||0)>=1).length;
-    const pct=Math.round(ownedCnt/stickers.length*100);
+    const oc=stickers.filter(s=>(copies[s.gn]||0)>=1).length;
+    const pct=Math.round(oc/stickers.length*100);
     if(q){
       const tm=team.n.toLowerCase().includes(q)||team.p.toLowerCase().includes(q);
       const cm=stickers.some(s=>s.code.toLowerCase().includes(q)||String(s.gn).includes(q));
       if(!tm&&!cm)return;
     }
-    if(fs==='complete'&&ownedCnt<stickers.length)return;
-    if(fs==='incomplete'&&ownedCnt===stickers.length)return;
+    if(fs==='complete'&&oc<stickers.length)return;
+    if(fs==='incomplete'&&oc===stickers.length)return;
     const isCol=collapsed[ti];
     const filtered=stickers.filter(s=>{
       const c=copies[s.gn]||0;
-      if(stickerFilter==='owned')return c>=1;
+      if(stickerFilter==='owned')return c===1;
       if(stickerFilter==='doubled')return c>1;
       if(stickerFilter==='missing')return c===0;
       return true;
     });
     html+=`<div class="team-card">
-      <div class="team-header" onclick="window._toggleCol(${ti})">
+      <div class="team-header" onclick="window._col(${ti})">
         <div class="team-name"><span class="team-badge">${team.p}</span>${team.n}</div>
         <div class="team-right">
-          <span class="team-pct">${ownedCnt}/${stickers.length}</span>
+          <span class="team-pct">${oc}/${stickers.length}</span>
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <span class="chevron">${isCol?'▼':'▲'}</span>
         </div>
@@ -360,20 +340,18 @@ function renderAlbum(){
       html+=`<div class="stickers-grid">`;
       filtered.forEach(s=>{
         const c=copies[s.gn]||0;
-        const isDup=c>1, isOwned=c===1;
-        let cls='sticker'+(isDup?' doubled':isOwned?' owned':'')+(s.foil?' foil':'');
-        html+=`<div class="${cls}" onclick="window._toggle(${s.gn})" title="${s.code} — #${s.gn}">
+        const isDup=c>1,isOwned=c===1;
+        const cls='sticker'+(isDup?' doubled':isOwned?' owned':'')+(s.foil?' foil':'');
+        html+=`<div class="${cls}" onclick="window._tog(${s.gn})" title="${s.code} — #${s.gn}">
           ${isDup?`<div class="dup-badge">${c}</div>`:''}
           <div class="s-seq">#${s.gn}</div>
           <div class="s-code">${s.code}</div>
           ${s.foil?'<span class="foil-star">✨</span>':''}`;
-        if(c>=1){
-          html+=`<div class="dup-controls">
-            <button class="dup-btn" onclick="window._adj(${s.gn},-1,event)">−</button>
-            <span class="dup-count">${c}</span>
-            <button class="dup-btn" onclick="window._adj(${s.gn},1,event)">+</button>
-          </div>`;
-        }
+        if(c>=1)html+=`<div class="dup-controls">
+          <button class="dup-btn" onclick="window._adj(${s.gn},-1,event)">−</button>
+          <span class="dup-count">${c}</span>
+          <button class="dup-btn" onclick="window._adj(${s.gn},1,event)">+</button>
+        </div>`;
         html+=`</div>`;
       });
       html+=`</div>`;
@@ -427,7 +405,7 @@ function renderMiss(){
         <div class="list-main">${it.code} <span style="color:#aaa;font-size:11px">— #${it.gn}</span></div>
         <div class="list-sub">${it.team}</div>
       </div>
-      <button class="add-btn" onclick="window._markOwned(${it.gn})">+ Tengo</button>
+      <button class="add-btn" onclick="window._own(${it.gn})">+ Tengo</button>
     </div>`).join('')+'</div>';
 }
 
@@ -442,68 +420,62 @@ function switchTab(tab){
   if(tab==='missing')renderMiss();
 }
 
-// Exponer funciones al HTML (necesario con type=module)
-window.switchTab = switchTab;
-window.setFilter = setFilter;
-window._toggle = toggleSticker;
-window._adj = adjCopies;
-window._markOwned = markOwned;
-window._toggleCol = (ti)=>{ collapsed[ti]=!collapsed[ti]; renderAlbum(); };
+window.switchTab=switchTab;
+window.setFilter=setFilter;
+window._tog=toggleSticker;
+window._adj=adjCopies;
+window._own=markOwned;
+window._col=(ti)=>{collapsed[ti]=!collapsed[ti];renderAlbum();};
 
-window.startApp = async function(){
-  const input = document.getElementById('username-input');
-  const name = input.value.trim();
-  if(!name){ input.focus(); return; }
-  userName = name;
-  document.getElementById('sync-user').textContent = name;
-  document.getElementById('modal').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  setSyncStatus('syncing', 'conectando...');
-
-  // Cargar datos de Firebase; si no hay nada, subir los iniciales
-  const snapshot = await get(copiesRef);
-  if(snapshot.exists()){
-    const data = snapshot.val();
-    copies = {};
-    Object.entries(data).forEach(([k,v])=>{ if(v>0) copies[parseInt(k)]=v; });
-    setSyncStatus('online','sincronizado ✓');
-  } else {
-    // Primera vez: subir datos iniciales
-    copies = buildInitialCopies();
-    const payload = {};
-    Object.entries(copies).forEach(([k,v])=>{ payload[k]=v; });
-    await update(copiesRef, payload);
-    setSyncStatus('online','datos iniciales cargados ✓');
+window.startApp=async function(){
+  const input=document.getElementById('username-input');
+  const name=input.value.trim();
+  if(!name){input.focus();return;}
+  userName=name;
+  document.getElementById('sync-user').textContent=name;
+  document.getElementById('modal').style.display='none';
+  document.getElementById('app').style.display='block';
+  setSyncStatus('syncing','conectando...');
+  try{
+    const snap=await get(ref(db,'album/copies'));
+    if(snap.exists()){
+      copies={};
+      Object.entries(snap.val()).forEach(([k,v])=>{if(v&&v>0)copies[fromKey(k)]=v;});
+      setSyncStatus('online','sincronizado ✓');
+    }else{
+      copies=buildInitialCopies();
+      const payload={};
+      Object.entries(copies).forEach(([k,v])=>{payload[toKey(parseInt(k))]=v;});
+      await set(ref(db,'album/copies'),payload);
+      setSyncStatus('online','datos iniciales cargados ✓');
+    }
+  }catch(e){
+    setSyncStatus('offline','error de conexión');
+    copies=buildInitialCopies();
   }
+  updateStats();renderAlbum();
 
-  updateStats(); renderAlbum();
-
-  // Escuchar cambios en tiempo real
-  onValue(copiesRef, (snap)=>{
-    if(!snap.exists()) return;
-    const data = snap.val();
-    copies = {};
-    Object.entries(data).forEach(([k,v])=>{ if(v>0) copies[parseInt(k)]=v; });
-    updateStats(); renderAlbum();
-    if(document.getElementById('tab-dups').style.display!=='none') renderDups();
-    if(document.getElementById('tab-missing').style.display!=='none') renderMiss();
+  onValue(ref(db,'album/copies'),(snap)=>{
+    if(!snap.exists())return;
+    copies={};
+    Object.entries(snap.val()).forEach(([k,v])=>{if(v&&v>0)copies[fromKey(k)]=v;});
+    updateStats();renderAlbum();
+    if(document.getElementById('tab-dups').style.display!=='none')renderDups();
+    if(document.getElementById('tab-missing').style.display!=='none')renderMiss();
   });
 
-  // Mostrar quién hizo el último cambio
-  onValue(lastEditRef, (snap)=>{
-    if(!snap.exists()) return;
-    const {user, sticker, time} = snap.val();
-    if(user && user !== userName){
-      const code = codeOf(sticker);
-      const hace = Math.round((Date.now()-time)/1000);
-      setSyncStatus('online', `${user} actualizó ${code} hace ${hace}s`);
+  onValue(ref(db,'album/lastEdit'),(snap)=>{
+    if(!snap.exists())return;
+    const {user,sticker,time}=snap.val();
+    if(user&&user!==userName){
+      const segs=Math.round((Date.now()-time)/1000);
+      setSyncStatus('online',`${user} actualizó ${codeOf(sticker)} hace ${segs<60?segs+'s':Math.round(segs/60)+'min'}`);
     }
   });
 };
 
-// Enter en el input del modal
-document.getElementById('username-input').addEventListener('keydown', e=>{
-  if(e.key==='Enter') window.startApp();
+document.getElementById('username-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter')window.startApp();
 });
 </script>
 </body>
