@@ -110,6 +110,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a
       <div class="stat amber">Duplicados: <b id="st-dups">0</b></div>
       <div class="stat red">Faltan: <b id="st-miss">0</b></div>
       <div class="stat">Total: <b>980</b></div>
+      <div class="stat">Avance: <b id="st-pct">0%</b></div>
     </div>
   </div>
   <div class="sync-bar">
@@ -293,6 +294,7 @@ function updateStats(){
   document.getElementById('st-owned').textContent=owned;
   document.getElementById('st-dups').textContent=dups;
   document.getElementById('st-miss').textContent=980-owned;
+  document.getElementById('st-pct').textContent=Math.round(owned/980*100)+'%';
 }
 
 async function saveOne(gn,value){
